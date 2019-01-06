@@ -1,3 +1,4 @@
+import tensorflow.keras as K
 from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, Lambda, MaxPooling2D
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.initializers import RandomNormal
@@ -10,6 +11,7 @@ from PIL import Image
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 import keras_util
+import pickle
 
 X = {}
 y = {}
@@ -22,7 +24,6 @@ nb_class_list = list(range(nb_class))
 PATH = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/image/'
 weight_data_path = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/'
 
-train_img_list = []
 
 def get_siamese_model(input_shape):
     '''
@@ -73,32 +74,30 @@ def get_siamese_model(input_shape):
     return siamese_net
 
 
-def get_diff_pair_train_data(img_list):
+def get_train_data_pair(img_list, sample_size = 100, same = False):
 
-    labels = np.random.choice(nb_class, size = 2, replace = False)
+    if same == False:
+        labels  = np.random.choice(nb_class, size = 2, replace = False)
+        # each class contains only one example and chosen from different classes.
+        # so target = 0
+        target = np.zeros(sample_size)
+        label_0 = labels[0]
+        label_1 = labels[1]
+    else:
+        labels  = np.random.choice(nb_class, size = 1, replace = False)
+        target = np.ones(sample_size)
+        label_0 = labels[0]
+        label_1 = labels[0]
+    indices = np.random.randint(0, len(img_list), size = sample_size)
 
-    # each class contains only one example and chosen from different classes.
-    # so target = 0
-    target = np.zeros(1)
-
-    img_0 = img_list[ labels[0] ].reshape(-1, IMG_W, IMG_H, IMG_D)
-    img_1 = img_list[ labels[1] ].reshape(-1, IMG_W, IMG_H, IMG_D)
-
-    return (img_0, img_1), target
+    selected_img_0_list = []
+    selected_img_1_list = []
+    for i in indices:
+        selected_img_0_list.append(img_list[ label_0 ][i])
+        selected_img_1_list.append(img_list[ label_1 ][i])
 
 
-def get_same_pair_train_data(img_list):
-
-    labels = np.random.choice(nb_class, size = 1, replace = False)
-
-    # each class contains only one example and chosen from different classes.
-    # so target = 0
-    target = np.ones(1)
-
-    img_0 = img_list[ labels[0] ].reshape(-1, IMG_W, IMG_H, IMG_D)
-    img_1 = img_list[ labels[0] ].reshape(-1, IMG_W, IMG_H, IMG_D)
-
-    return (img_0, img_1), target
+    return (selected_img_0_list, selected_img_1_list), target
 
 
 def get_diff_pair_test_data(img_list, sample_size):
@@ -130,7 +129,7 @@ def get_diff_pair_test_data(img_list, sample_size):
 def test_oneshot(model, img_list, nb_validation):
 
     n_correct = 0
-    sample_size = 5
+    sample_size = 20
 
     for i in range(nb_validation):
 
@@ -146,7 +145,7 @@ def test_oneshot(model, img_list, nb_validation):
 
 
 if __name__ == '__main__':
-
+    ''''''
     print('Model Building Started')
     input_shape = (IMG_H, IMG_W, IMG_D)
     siamese_net = get_siamese_model(input_shape)
@@ -154,42 +153,41 @@ if __name__ == '__main__':
     optimizer = Adam(lr = 0.00006)
     siamese_net.compile(loss = "binary_crossentropy", optimizer = optimizer)
     print('Model Building Finished')
-
+    ''''''
 
     print("Image Read Started")
+    train_image_list = []
     for i in nb_class_list:
         with open(PATH + str(i) + '.pickle','rb') as f:
             train_image_list.append(pickle.load(f)[0])
 
-    train_data, test_data = util.load_MNIST_image_label(PATH)
-    print(len(train_img_list))
+    _, test_data = keras_util.load_MNIST_image_label(PATH)
     test_img_list  = test_data[0]
     print("Image Read Finished")
 
-
     print('Training Loop Started')
-    n_iter = 2000
+    n_iter = 1000
     best = -1
     evaluate_every = 10
     for i in range(1, n_iter):
 
-        train_img_pair, target = get_diff_pair_train_data(train_img_list)
+        train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 100, same = False)
         loss = siamese_net.train_on_batch(train_img_pair, target)
 
-        train_img_pair, target = get_same_pair_train_data(train_img_list)
+        train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 100, same = True)
         loss = siamese_net.train_on_batch(train_img_pair, target)
-
+        # print(loss)
+        ''''''
         if i % evaluate_every == 0:
             val_acc = test_oneshot(siamese_net, img_list = test_img_list, nb_validation = 5)
 
-            if val_acc >= best:
-                print("Current best: {:.2f}, previous best: {:.2f}".format(val_acc, best))
+            # if val_acc >= best:
+            print("Current best: {:.2f}, previous best: {:.2f}".format(val_acc, best))
                 # print("Saving weights to: {0} \n".format(weights_path))
                 # siamese_net.save_weights(weight_data_path + 'model_weights.h5')
-                best = val_acc
-
+            best = val_acc
+        ''''''
     print('Training Loop Finished')
-
 
 
 
