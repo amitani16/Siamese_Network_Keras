@@ -86,13 +86,27 @@ def generate_augmented_image(data_generator, img_src, nb_images = 9):
 
 def generate_random_augmented_image(data_generator, img_src, nb_images = 9):
 
-    img = img_src.reshape(IMG_H, IMG_W, 1)
-
     img_list = []
     for i in range(nb_images):
-        img_list.append( data_generator.random_transform(img) )
+        img_list.append( data_generator.random_transform(img_src) )
 
     return img_list
+
+
+def augment_MNIST_image(label_src, img_src, nb_images = 2500):
+
+    datagen = ImageDataGenerator(rotation_range     = 15.0, # degree
+                                 width_shift_range  = 0.2,
+                                 height_shift_range = 0.2,
+                                 shear_range        = 5.0, # degree
+                                 zoom_range         = 0.5,
+                                 horizontal_flip    = True,
+                                 vertical_flip      = True,
+                                )
+
+    augmented_img_list = generate_random_augmented_image(datagen, img_src, nb_images)
+
+    return (augmented_img_list, label_src, )
 
 
 if __name__ == '__main__':
@@ -100,14 +114,9 @@ if __name__ == '__main__':
     train_data, test_data = load_MNIST_image_label(PATH)
     img_list = train_data[0]
 
-    x = img_list[1].reshape(1, IMG_H, IMG_W, 1)
-    grid_shape = (6, 6)
+    x = img_list[5].reshape(IMG_H, IMG_W, 1)
+    grid_shape = (20, 20)
 
-    # datagen = ImageDataGenerator(rotation_range = 90)
-    datagen = ImageDataGenerator(rotation_range = 90, width_shift_range = 0.2, height_shift_range = 0.2,)
-    # datagen = ImageDataGenerator()
-    # img_list = generate_augmented_image(datagen, img_src = x)
-    print(x.shape)
-    img_list = generate_random_augmented_image(datagen, img_src = x, nb_images = grid_shape[0] * grid_shape[1])
+    daga_list = augment_MNIST_image(train_data[1], x, nb_images = grid_shape[0] * grid_shape[1])
 
-    show_effect_2(img_list, grid_shape)
+    show_effect_2(daga_list[0], grid_shape)
