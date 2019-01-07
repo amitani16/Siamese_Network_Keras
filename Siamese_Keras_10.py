@@ -107,8 +107,7 @@ def get_diff_pair_test_data(img_list, sample_size):
     labels  = np.random.choice(nb_class, size = 2, replace = False)
     indices = np.random.randint(0, 100, size = sample_size)
 
-    # each class contains only one example and chosen from different classes.
-    # so target = 0
+    # chosen from different class. so target = 0
     target = np.zeros(sample_size)
 
     img_0_list = img_list[ (labels[0] * 100):( (labels[0] + 1) * 100 ) ]
@@ -135,7 +134,7 @@ def test_oneshot(model, img_list, nb_validation):
 
         inputs, targets = get_diff_pair_test_data(img_list = img_list, sample_size = sample_size)
         probs = model.predict(inputs)
-        # print('probs = ', probs)
+        print('probs = ', probs)
         if np.argmax(probs) == np.argmax(targets):
             n_correct += 1
 
@@ -144,7 +143,8 @@ def test_oneshot(model, img_list, nb_validation):
     return percent_correct
 
 
-if __name__ == '__main__':
+def main():
+
     ''''''
     print('Model Building Started')
     input_shape = (IMG_H, IMG_W, IMG_D)
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     print("Image Read Finished")
 
     print('Training Loop Started')
-    n_iter = 1000
+    n_iter = 20
     best = -1
     evaluate_every = 10
     for i in range(1, n_iter):
@@ -183,13 +183,18 @@ if __name__ == '__main__':
 
             if val_acc >= best:
                 print("Current best: {:.2f}, previous best: {:.2f}".format(val_acc, best))
-                print("Saving weights to: {0} \n".format(weights_path))
-                siamese_net.save_weights(weight_data_path + 'model_weights.h5')
+                # print("Saving weights to: {0} \n".format(weight_data_path))
+                # siamese_net.save_weights(weight_data_path + 'model_weights.h5')
                 best = val_acc
         ''''''
+
+    # open('SiameseNet.json',"w").write(siamese_net.to_json())
     print('Training Loop Finished')
 
 
+if __name__ == '__main__':
+
+    main()
 
 
 
