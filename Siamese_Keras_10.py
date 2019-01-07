@@ -181,11 +181,11 @@ if __name__ == '__main__':
         if i % evaluate_every == 0:
             val_acc = test_oneshot(siamese_net, img_list = test_img_list, nb_validation = 5)
 
-            # if val_acc >= best:
-            print("Current best: {:.2f}, previous best: {:.2f}".format(val_acc, best))
-                # print("Saving weights to: {0} \n".format(weights_path))
-                # siamese_net.save_weights(weight_data_path + 'model_weights.h5')
-            best = val_acc
+            if val_acc >= best:
+                print("Current best: {:.2f}, previous best: {:.2f}".format(val_acc, best))
+                print("Saving weights to: {0} \n".format(weights_path))
+                siamese_net.save_weights(weight_data_path + 'model_weights.h5')
+                best = val_acc
         ''''''
     print('Training Loop Finished')
 
