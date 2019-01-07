@@ -109,14 +109,44 @@ def augment_MNIST_image(label_src, img_src, nb_images = 2500):
     return (augmented_img_list, label_src, )
 
 
+def display_n_images_in_n_windows(img_list):
+
+    for i in range(len(img_list)):
+
+        plt.figure(i)
+        plt.imshow(img_list[i].reshape(IMG_W, IMG_H), cmap = 'gray', aspect = 'auto')
+
+    plt.show()
+
+
+
 if __name__ == '__main__':
 
     train_data, test_data = load_MNIST_image_label(PATH)
     img_list = train_data[0]
 
+    display_n_images_in_n_windows(img_list)
+
+    '''
     x = img_list[5].reshape(IMG_H, IMG_W, 1)
     grid_shape = (20, 20)
 
     daga_list = augment_MNIST_image(train_data[1], x, nb_images = grid_shape[0] * grid_shape[1])
 
     show_effect_2(daga_list[0], grid_shape)
+    '''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
