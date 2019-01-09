@@ -13,11 +13,10 @@ import matplotlib.pyplot as plt
 import keras_util
 import pickle
 
-X = {}
-y = {}
 
 nb_class = 10
 nb_class_list = list(range(nb_class))
+nb_test_data = 100
 
 (IMG_W, IMG_H, IMG_D) = (28, 28, 1)
 
@@ -46,12 +45,12 @@ def get_siamese_model(input_shape):
     conv_net.add(MaxPooling2D(pool_size = (2, 2), padding = 'same'))
 
     # Third layer
-    conv_net.add(Conv2D(filters = 32, kernel_size = (4, 4), padding  = 'same', activation = 'relu',
+    conv_net.add(Conv2D(filters = 256, kernel_size = (4, 4), padding  = 'same', activation = 'relu',
                         kernel_initializer = RandomNormal(mean = 0, stddev = 0.01)))
     conv_net.add(MaxPooling2D(pool_size = (2, 2), padding = 'same'))
 
     conv_net.add(Flatten())
-    conv_net.add(Dense(units = 512, activation = "sigmoid",
+    conv_net.add(Dense(units = 1024, activation = "sigmoid",
     # conv_net.add(Dense(units = 1024 * 2 * 2, activation = "sigmoid",
                        kernel_initializer = RandomNormal(mean = 0, stddev = 0.01),
                        bias_initializer = RandomNormal(mean = 0.5, stddev = 0.01)))
@@ -79,15 +78,16 @@ def get_train_data_pair(img_list, sample_size = 100):
     # different : target = 0, same : target = 1s
     labels  = np.random.choice(nb_class, size = 3, replace = False)
     target_diff = np.zeros(sample_size)
-    target_same = np.oness(sample_size)
+    target_same = np.ones(sample_size)
     target = np.concatenate([target_diff, target_same])
 
     label_diff_A = labels[0]
     label_diff_B = labels[1]
-    label_same_A = labels[2]
-    label_same_B = labels[2]
+    label_same_A = labels[2] # make same data set
+    label_same_B = labels[2] # make same data set
 
-    indices = np.random.randint(0, len(img_list), size = sample_size)
+    img_list_len = len( img_list[ label_diff_A ] )
+    indices = np.random.randint(0, img_list_len, size = sample_size)
 
     selected_diff_img_A_list = []
     selected_diff_img_B_list = []
@@ -99,44 +99,61 @@ def get_train_data_pair(img_list, sample_size = 100):
         selected_same_img_A_list.append(img_list[label_same_A][i])
         selected_same_img_B_list.append(img_list[label_same_B][i])
 
-    return (selected_diff_img_A_list, selected_diff_img_B_list, selected_same_img_A_list, selected_same_img_B_list), target
+    selected_same_img_A_list = shuffle(selected_same_img_A_list)
+    selected_same_img_B_list = shuffle(selected_same_img_B_list)
+
+    A = np.concatenate([selected_diff_img_A_list, selected_same_img_A_list])
+    B = np.concatenate([selected_diff_img_B_list, selected_same_img_B_list])
+
+    return (A, B), target
 
 
-def get_diff_pair_test_data(img_list, sample_size):
-    '''
-    https://github.com/akshaysharma096/Siamese-Networks/blob/master/Few%20Shot%20Learning%20-%20V1.ipynb
-    '''
-    labels  = np.random.choice(nb_class, size = 2, replace = False)
-    indices = np.random.randint(0, 100, size = sample_size)
+def get_test_data_pair(img_list):
 
-    # chosen from different class. so target = 0
-    target = np.zeros(sample_size)
+    A_label = np.random.randint(0, nb_class)
+    A_index = np.random.randint(0, nb_test_data)
 
-    img_0_list = img_list[ (labels[0] * 100):( (labels[0] + 1) * 100 ) ]
-    img_1_list = img_list[ (labels[1] * 100):( (labels[1] + 1) * 100 ) ]
+    B_indices  = np.random.randint(0, nb_test_data, size = nb_test_data)
 
-    selected_img_0_list = []
-    selected_img_1_list = []
-    for i in indices:
-        selected_img_0_list.append(img_0_list[i])
-        selected_img_1_list.append(img_1_list[i])
+    # print('len(img_list) = ', len(img_list))
+    img = []
+    for i in range(nb_class):
 
-    selected_img_0 = np.asarray(selected_img_0_list).reshape(sample_size, IMG_W, IMG_H, IMG_D)
-    selected_img_1 = np.asarray(selected_img_1_list).reshape(sample_size, IMG_W, IMG_H, IMG_D)
+        start = i       * nb_test_data
+        end   = (i + 1) * nb_test_data
+        # print('i = {}, start = {}, end = {}'.format(i, start, end))
 
-    return (selected_img_0, selected_img_1), target
+        img.append(img_list[ start:end ])
+        # print(type(a))
+
+    # diff class : target = 0, same class : target = 1
+    targets = np.zeros(nb_class)
+    targets[A_label] = 1
+
+    selected_img_A_list = []
+    selected_img_B_list = []
+
+    img_A = np.asarray(img[A_label][A_index]).reshape(IMG_W, IMG_H, IMG_D)
+    for i in range(nb_class):
+        selected_img_A_list.append(img_A)
+
+    for i in range(nb_class):
+        index = B_indices[i]
+        img_B = np.asarray(img[i][index]).reshape(IMG_W, IMG_H, IMG_D)
+        selected_img_B_list.append(img_B)
+
+    return (selected_img_A_list, selected_img_B_list), targets
 
 
 def test_oneshot(model, img_list, nb_validation):
 
     n_correct = 0
-    sample_size = 20
-
     for i in range(nb_validation):
 
-        inputs, targets = get_diff_pair_test_data(img_list = img_list, sample_size = sample_size)
+        inputs, targets = get_test_data_pair(img_list)
         probs = model.predict(inputs)
-        print('probs = ', probs)
+        # print('targets = ', targets)
+        # print('probs = ', probs)
         if np.argmax(probs) == np.argmax(targets):
             n_correct += 1
 
@@ -168,16 +185,14 @@ def main():
     print("Image Read Finished")
 
     print('Training Loop Started')
-    n_iter = 20
+    n_iter = 200
     best = -1
     evaluate_every = 10
     for i in range(1, n_iter):
 
-        train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 100, same = False)
+        train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 50)
         loss = siamese_net.train_on_batch(train_img_pair, target)
 
-        train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 100, same = True)
-        loss = siamese_net.train_on_batch(train_img_pair, target)
         # print(loss)
         ''''''
         if i % evaluate_every == 0:

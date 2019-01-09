@@ -1,11 +1,8 @@
 import numpy as np
+from sklearn.utils import shuffle
 
-a = np.zeros(10)
-b = np.ones(5)
 
-print(a)
+a = np.asarray([1, 2, 3])
+b = np.array([a] * 2)
+
 print(b)
-
-c = np.concatenate([a, b, b])
-
-print(c)
