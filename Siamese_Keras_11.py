@@ -190,7 +190,7 @@ def main():
     evaluate_every = 10
     for i in range(1, n_iter):
 
-        train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 50)
+        train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 500)
         loss = siamese_net.train_on_batch(train_img_pair, target)
 
         # print(loss)
