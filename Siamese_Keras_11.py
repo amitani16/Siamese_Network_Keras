@@ -1,3 +1,5 @@
+import os
+
 import tensorflow.keras as K
 from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, Lambda, MaxPooling2D
 from tensorflow.keras.regularizers import l2
@@ -164,15 +166,14 @@ def test_oneshot(model, img_list, nb_validation):
 
 def main():
 
-    ''''''
     print('Model Building Started')
     input_shape = (IMG_H, IMG_W, IMG_D)
     siamese_net = get_siamese_model(input_shape)
     siamese_net.summary()
     optimizer = Adam(lr = 0.00006)
     siamese_net.compile(loss = "binary_crossentropy", optimizer = optimizer)
+    open('SiameseNet.json',"w").write(siamese_net.to_json())
     print('Model Building Finished')
-    ''''''
 
     print("Image Read Started")
     train_image_list = []
@@ -185,7 +186,7 @@ def main():
     print("Image Read Finished")
 
     print('Training Loop Started')
-    n_iter = 200
+    n_iter = 10
     best = -1
     evaluate_every = 10
     for i in range(1, n_iter):
@@ -193,8 +194,6 @@ def main():
         train_img_pair, target = get_train_data_pair(train_image_list, sample_size = 500)
         loss = siamese_net.train_on_batch(train_img_pair, target)
 
-        # print(loss)
-        ''''''
         if i % evaluate_every == 0:
             val_acc = test_oneshot(siamese_net, img_list = test_img_list, nb_validation = 5)
 
@@ -203,9 +202,7 @@ def main():
                 # print("Saving weights to: {0} \n".format(weight_data_path))
                 # siamese_net.save_weights(weight_data_path + 'model_weights.h5')
                 best = val_acc
-        ''''''
 
-    # open('SiameseNet.json',"w").write(siamese_net.to_json())
     print('Training Loop Finished')
 
 
