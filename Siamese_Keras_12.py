@@ -1,12 +1,21 @@
 import os
 
-import tensorflow.keras as K
-from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, Lambda, MaxPooling2D
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.initializers import RandomNormal
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+if os.name == 'posix':
+    import tensorflow.keras as K
+    from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, Lambda, MaxPooling2D
+    from tensorflow.keras.regularizers import l2
+    from tensorflow.keras.initializers import RandomNormal
+    from tensorflow.keras.models import Model, Sequential
+    from tensorflow.keras.optimizers import Adam
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+else:
+    import keras as K
+    from keras.layers import Input, Conv2D, Dense, Flatten, Lambda, MaxPooling2D
+    from keras.regularizers import l2
+    from keras.initializers import RandomNormal
+    from keras.models import Model, Sequential
+    from keras.optimizers import Adam
+    from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import glob
 from PIL import Image
@@ -22,8 +31,12 @@ nb_test_data = 100
 
 (IMG_W, IMG_H, IMG_D) = (28, 28, 1)
 
-PATH = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/image/'
-weight_data_path = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/'
+if os.name == 'posix':
+    PATH = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/image/'
+    weight_data_path = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/'
+else:
+    PATH = 'D:\\amitani\\Documents\\Software\\GitHub\\Siamese_Network_Keras\\image\\'
+    weight_data_path = 'D:\\amitani\\Documents\\Software\\GitHub\\Siamese_Network_Keras\\'
 
 
 def get_siamese_model(input_shape):
@@ -107,7 +120,10 @@ def get_train_data_pair(img_list, sample_size = 100):
     A = np.concatenate([selected_diff_img_A_list, selected_same_img_A_list])
     B = np.concatenate([selected_diff_img_B_list, selected_same_img_B_list])
 
-    return (A, B), target
+    if os.name == 'posix':
+        return (A, B), target
+    else:
+        return [A, B], target
 
 
 def get_test_data_pair(img_list):
@@ -144,7 +160,10 @@ def get_test_data_pair(img_list):
         img_B = np.asarray(img[i][index]).reshape(IMG_W, IMG_H, IMG_D)
         selected_img_B_list.append(img_B)
 
-    return (selected_img_A_list, selected_img_B_list), targets
+    if os.name == 'posix':
+        return (selected_img_A_list, selected_img_B_list), targets
+    else:
+        return [selected_img_A_list, selected_img_B_list], targets
 
 
 def test_oneshot(model, img_list, nb_validation):

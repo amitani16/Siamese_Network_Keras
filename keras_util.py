@@ -1,11 +1,17 @@
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import os
+
+if os.name == 'posix':
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+    from tensorflow.keras.preprocessing.image import array_to_img
+else:
+    from keras.preprocessing.image import ImageDataGenerator
+    from keras.preprocessing.image import array_to_img
 import numpy as np
 import glob
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import pickle
-from tensorflow.keras.preprocessing.image import array_to_img
 
 nb_class = 10
 nb_class_list = list(range(nb_class))
@@ -13,8 +19,10 @@ nb_class_list = list(range(nb_class))
 (IMG_W, IMG_H, IMG_D) = (28, 28, 1)
 img_list = []
 
-PATH = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/image/'
-
+if os.name == 'posix':
+    PATH = '/Users/ichiroamitani/Documents/Software/GitHub/Siamese_network/image/'
+else:
+    PATH = 'D:\\amitani\\Documents\\Software\\GitHub\\Siamese_Network_Keras\\image\\'
 
 def load_MNIST_image_label(data_path, nb_class = 10):
 

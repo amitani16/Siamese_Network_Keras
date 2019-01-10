@@ -1,0 +1,223 @@
+backend: tensorflow
+class_name: Model
+config:
+  input_layers:
+  - [input_1, 0, 0]
+  - [input_2, 0, 0]
+  layers:
+  - class_name: InputLayer
+    config:
+      batch_input_shape: !!python/tuple [null, 28, 28, 1]
+      dtype: float32
+      name: input_1
+      sparse: false
+    inbound_nodes: []
+    name: input_1
+  - class_name: InputLayer
+    config:
+      batch_input_shape: !!python/tuple [null, 28, 28, 1]
+      dtype: float32
+      name: input_2
+      sparse: false
+    inbound_nodes: []
+    name: input_2
+  - class_name: Sequential
+    config:
+      build_input_shape: !!python/object/apply:tensorflow.python.framework.tensor_shape.TensorShape
+      - - !!python/object/apply:tensorflow.python.framework.tensor_shape.Dimension [
+          null]
+        - !!python/object/apply:tensorflow.python.framework.tensor_shape.Dimension [
+          28]
+        - !!python/object/apply:tensorflow.python.framework.tensor_shape.Dimension [
+          28]
+        - !!python/object/apply:tensorflow.python.framework.tensor_shape.Dimension [
+          1]
+      layers:
+      - class_name: Conv2D
+        config:
+          activation: relu
+          activity_regularizer: null
+          bias_constraint: null
+          bias_initializer:
+            class_name: Zeros
+            config: {dtype: float32}
+          bias_regularizer: null
+          data_format: channels_last
+          dilation_rate: &id002 !!python/tuple [1, 1]
+          dtype: null
+          filters: 16
+          kernel_constraint: null
+          kernel_initializer:
+            class_name: RandomNormal
+            config: {dtype: float32, mean: 0, seed: null, stddev: 0.01}
+          kernel_regularizer: null
+          kernel_size: !!python/tuple [4, 4]
+          name: conv2d
+          padding: same
+          strides: &id003 !!python/tuple [1, 1]
+          trainable: true
+          use_bias: true
+      - class_name: MaxPooling2D
+        config:
+          data_format: channels_last
+          dtype: null
+          name: max_pooling2d
+          padding: same
+          pool_size: &id001 !!python/tuple [2, 2]
+          strides: *id001
+          trainable: true
+      - class_name: Conv2D
+        config:
+          activation: relu
+          activity_regularizer: null
+          bias_constraint: null
+          bias_initializer:
+            class_name: Zeros
+            config: {dtype: float32}
+          bias_regularizer: null
+          data_format: channels_last
+          dilation_rate: *id002
+          dtype: null
+          filters: 64
+          kernel_constraint: null
+          kernel_initializer:
+            class_name: RandomNormal
+            config: {dtype: float32, mean: 0, seed: null, stddev: 0.01}
+          kernel_regularizer: null
+          kernel_size: !!python/tuple [4, 4]
+          name: conv2d_1
+          padding: same
+          strides: *id003
+          trainable: true
+          use_bias: true
+      - class_name: MaxPooling2D
+        config:
+          data_format: channels_last
+          dtype: null
+          name: max_pooling2d_1
+          padding: same
+          pool_size: &id004 !!python/tuple [2, 2]
+          strides: *id004
+          trainable: true
+      - class_name: Conv2D
+        config:
+          activation: relu
+          activity_regularizer: null
+          bias_constraint: null
+          bias_initializer:
+            class_name: Zeros
+            config: {dtype: float32}
+          bias_regularizer: null
+          data_format: channels_last
+          dilation_rate: *id002
+          dtype: null
+          filters: 256
+          kernel_constraint: null
+          kernel_initializer:
+            class_name: RandomNormal
+            config: {dtype: float32, mean: 0, seed: null, stddev: 0.01}
+          kernel_regularizer: null
+          kernel_size: !!python/tuple [4, 4]
+          name: conv2d_2
+          padding: same
+          strides: *id003
+          trainable: true
+          use_bias: true
+      - class_name: MaxPooling2D
+        config:
+          data_format: channels_last
+          dtype: null
+          name: max_pooling2d_2
+          padding: same
+          pool_size: &id005 !!python/tuple [2, 2]
+          strides: *id005
+          trainable: true
+      - class_name: Flatten
+        config: {data_format: channels_last, dtype: null, name: flatten, trainable: true}
+      - class_name: Dense
+        config:
+          activation: sigmoid
+          activity_regularizer: null
+          bias_constraint: null
+          bias_initializer:
+            class_name: RandomNormal
+            config: {dtype: float32, mean: 0.5, seed: null, stddev: 0.01}
+          bias_regularizer: null
+          dtype: null
+          kernel_constraint: null
+          kernel_initializer:
+            class_name: RandomNormal
+            config: {dtype: float32, mean: 0, seed: null, stddev: 0.01}
+          kernel_regularizer: null
+          name: dense
+          trainable: true
+          units: 1024
+          use_bias: true
+      name: sequential
+    inbound_nodes:
+    - - - input_1
+        - 0
+        - 0
+        - {}
+    - - - input_2
+        - 0
+        - 0
+        - {}
+    name: sequential
+  - class_name: Lambda
+    config:
+      arguments: {}
+      dtype: float32
+      function: !!python/tuple ['4wEAAAAAAAAAAQAAAAQAAABTAAAAcxgAAAB0AGoBagJ8AGQBGQB8AGQCGQAYAIMBUwApA07pAAAA
+
+          AOkBAAAAKQPaAUvaB2JhY2tlbmTaA2FicykB2gd0ZW5zb3JzqQByBwAAAPoTU2lhbWVzZV9LZXJh
+
+          c18xMS5wedoIPGxhbWJkYT5BAAAAcwAAAAA=
+
+          ', null, null]
+      function_type: lambda
+      module: __main__
+      name: lambda
+      output_shape: null
+      output_shape_module: null
+      output_shape_type: raw
+      trainable: true
+    inbound_nodes:
+    - - - sequential
+        - 1
+        - 0
+        - &id006 {}
+      - - sequential
+        - 2
+        - 0
+        - *id006
+    name: lambda
+  - class_name: Dense
+    config:
+      activation: sigmoid
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: RandomNormal
+        config: {dtype: float32, mean: 0.5, seed: null, stddev: 0.01}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config: {dtype: float32, seed: null}
+      kernel_regularizer: null
+      name: dense_1
+      trainable: true
+      units: 1
+      use_bias: true
+    inbound_nodes:
+    - - - lambda
+        - 0
+        - 0
+        - {}
+    name: dense_1
+  name: model
+  output_layers:
+  - [dense_1, 0, 0]
+keras_version: 2.1.6-tf
